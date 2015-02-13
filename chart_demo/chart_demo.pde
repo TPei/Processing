@@ -1,11 +1,15 @@
-ArrayList<Integer> userValues = new ArrayList<Integer>();
-int width = 480;
-int height = 480;
+LineChart myLineChart = new LineChart();
+int width = 1000;
+int height = 1000;
+int baseline = height / 2;
 
 void setup() {
+  for(int x = 0; x < 100; x++){
+    myLineChart.addXValue(x*x);
+  }
+
   size(width, height);
   background(255);
-  int baseline = 240;
   
   line(0, baseline, width, baseline);
   
@@ -16,57 +20,45 @@ void draw() {
   
 }
 
- 
+
 String value = "";
 
 void keyPressed(){
   if(key == 'x'){
-    int val = int(value);
+    // add entered value to line chart, update line chart
+    myLineChart.addXValue(int(value));
     value = "";
-    graph(val);
+    graph();
   }
   else if (key == 'c'){
+    // clear line chart and canvas
     background(255);
-    userValues = new ArrayList<Integer>();
+    myLineChart = new LineChart();
+  }
+  else if (key == 'r') {
+    // refresh line chart and canvas
+    graph();
   }
   else{
     value = value + key;
   }
 }
 
-void graph(int value){
+void graph() {
   background(255);
-  int baseline = 240;
-  
-  // enter y values here
-  userValues.add(value);
-  
-  int max = 0; 
-  int min = 0;
-  for(int i = 0; i < userValues.size(); i++){
-    int val = userValues.get(i);
-    if(val > max){
-      max = val;
-    }
-    if(val < min){
-      min = val;
-    }
-  }
-  println(max);
-  println(min);
-  
-  // TODO: relative calculation (max value = 100%)
+   
+  ArrayList<Integer> relSizes = myLineChart.getRelativeXValues(height);
   
   line(0, baseline, width, baseline);
   
-  int stepSize = (width/userValues.size());
+  int stepSize = (width/relSizes.size());
   int offset = stepSize / 2;
   
   int diameter = 10;
   int prev = 0;
-  for(int i = 0; i < userValues.size(); i++){
+  for(int i = 0; i < relSizes.size(); i++){
     int nowX = i * stepSize + offset;
-    int nowY = baseline - userValues.get(i) + (diameter / 2);
+    int nowY = baseline - relSizes.get(i) + (diameter / 2);
     int thenX = Math.max(0,(i-1) * stepSize + offset);
     int thenY = baseline - prev + (diameter / 2);
     if(prev == 0){
@@ -75,6 +67,9 @@ void graph(int value){
     
     line(thenX, thenY, nowX, nowY);
     ellipse(nowX, nowY, diameter, diameter);
-    prev = userValues.get(i);
+    prev = relSizes.get(i);
   }
 }
+
+
+
